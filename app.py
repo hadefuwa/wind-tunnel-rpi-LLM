@@ -46,7 +46,7 @@ Please provide a clear, technical analysis based on this aerodynamic data. Focus
         response = requests.post(
             "http://localhost:11434/api/generate",
             json={
-                "model": "gemma2:2b",  # Updated to use Gemma2 2B as it's more common
+                "model": "gemma3:1b",  # Updated to use Gemma3 1B model
                 "prompt": full_prompt,
                 "stream": False
             },
@@ -122,9 +122,9 @@ if data is not None:
             go.Scatter(x=data["AoA (deg)"], y=data["Cd"], name="Drag Coefficient (Cd)"),
             secondary_y=True,
         )
-        fig4.set_xaxis_title("Angle of Attack (degrees)")
-        fig4.set_yaxis_title("Lift Coefficient (Cl)", secondary_y=False)
-        fig4.set_yaxis_title("Drag Coefficient (Cd)", secondary_y=True)
+        fig4.update_xaxes(title_text="Angle of Attack (degrees)")
+        fig4.update_yaxes(title_text="Lift Coefficient (Cl)", secondary_y=False)
+        fig4.update_yaxes(title_text="Drag Coefficient (Cd)", secondary_y=True)
         fig4.update_layout(title_text="Aerodynamic Coefficients vs Angle of Attack")
         st.plotly_chart(fig4, use_container_width=True)
     
