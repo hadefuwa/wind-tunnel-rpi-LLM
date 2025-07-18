@@ -8,6 +8,9 @@ app = Flask(__name__)
 # Load data
 data = pd.read_csv('wind_tunnel_test_data.csv')
 
+# Chat history storage (in-memory for simplicity)
+chat_history = []
+
 def query_ollama(prompt, data_summary):
     """Send query to local Ollama API with Gemma3 1B model"""
     try:
@@ -18,7 +21,7 @@ def query_ollama(prompt, data_summary):
 
 User question: {prompt}
 
-Please provide a clear, technical analysis based on this aerodynamic data. Focus on relationships between angle of attack (AoA), lift, drag, and aerodynamic coefficients (Cl, Cd)."""
+Please provide a clear, CONCISE technical analysis based on this aerodynamic data. Keep your response brief (2-3 sentences max). Focus on key relationships between angle of attack (AoA), lift, drag, and aerodynamic coefficients (Cl, Cd). Be direct and specific."""
 
         # Ollama API call
         response = requests.post(
@@ -26,14 +29,23 @@ Please provide a clear, technical analysis based on this aerodynamic data. Focus
             json={
                 "model": "gemma3:1b",  # Using Gemma3 1B model
                 "prompt": full_prompt,
-                "stream": False
+                "stream": False,
+                "options": {
+                    "num_predict": 100,  # Limit response to ~100 tokens
+                    "temperature": 0.1   # Lower temperature for more focused responses
+                }
             }
         )
         
         if response.status_code == 200:
             return response.json()["response"]
         else:
-            return f"Error: API returned status code {response.status_code}"
+            # Get more detailed error information
+            try:
+                error_detail = response.json()
+                return f"Error: API returned status code {response.status_code}. Details: {error_detail}"
+            except:
+                return f"Error: API returned status code {response.status_code}. Response: {response.text[:200]}"
     
     except requests.exceptions.ConnectionError:
         return "Error: Could not connect to Ollama. Make sure Ollama is running locally on port 11434."
@@ -198,6 +210,7 @@ template = '''
             <input type="text" id="questionInput" class="chat-input" placeholder="e.g., What is the relationship between angle of attack and lift coefficient?" />
             <br>
             <button class="btn" onclick="sendQuestion()">Send test data to AI</button>
+            <button class="btn" onclick="testOllama()" style="background-color: #28a745; margin-left: 10px;">Test AI Connection</button>
             
             <div class="loading" id="loading">AI is analyzing your data...</div>
             <div id="response" class="response" style="display: none;"></div>
@@ -344,6 +357,36 @@ template = '''
             });
         }
         
+        function testOllama() {
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('response').style.display = 'none';
+            
+            // Test Ollama connection
+            fetch('/test_ollama')
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show response
+                document.getElementById('response').style.display = 'block';
+                if (data.status === 'success') {
+                    document.getElementById('response').textContent = 'AI Connection Test: SUCCESS\n\nResponse: ' + data.response;
+                } else {
+                    document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + JSON.stringify(data, null, 2);
+                }
+            })
+            .catch(error => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show error
+                document.getElementById('response').style.display = 'block';
+                document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + error;
+            });
+        }
+        
         // Allow Enter key to send question
         document.getElementById('questionInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -369,6 +412,25 @@ def home():
         cl_data=data['Cl'].tolist(),
         cd_data=data['Cd'].tolist()
     )
+
+@app.route('/test_ollama')
+def test_ollama():
+    """Simple test endpoint to check if Ollama is working"""
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "gemma3:1b",
+                "prompt": "Hello, respond with 'AI is working!'",
+                "stream": False
+            }
+        )
+        if response.status_code == 200:
+            return jsonify({'status': 'success', 'response': response.json()["response"]})
+        else:
+            return jsonify({'status': 'error', 'code': response.status_code, 'details': response.text[:200]})
+    except Exception as e:
+        return jsonify({'status': 'error', 'exception': str(e)})
 
 @app.route('/ask_ai', methods=['POST'])
 def ask_ai():
