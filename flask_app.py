@@ -8,9 +8,6 @@ app = Flask(__name__)
 # Load data
 data = pd.read_csv('wind_tunnel_test_data.csv')
 
-# Chat history storage (in-memory for simplicity)
-chat_history = []
-
 def query_ollama(prompt, data_summary):
     """Send query to local Ollama API with Gemma3 1B model"""
     try:
@@ -233,167 +230,202 @@ template = '''
     </div>
     
     <script>
-        // Plot data - using JSON encoding to prevent syntax errors
-        var aoa_data = JSON.parse('{{ aoa_data|tojson }}');
-        var lift_data = JSON.parse('{{ lift_data|tojson }}');
-        var drag_data = JSON.parse('{{ drag_data|tojson }}');
-        var cl_data = JSON.parse('{{ cl_data|tojson }}');
-        var cd_data = JSON.parse('{{ cd_data|tojson }}');
+        // Safe data loading with error handling
+        try {
+            // Plot data - safer approach
+            var aoa_data = {{ aoa_data|safe }};
+            var lift_data = {{ lift_data|safe }};
+            var drag_data = {{ drag_data|safe }};
+            var cl_data = {{ cl_data|safe }};
+            var cd_data = {{ cd_data|safe }};
+        } catch (e) {
+            console.error('Data loading error:', e);
+            var aoa_data = [];
+            var lift_data = [];
+            var drag_data = [];
+            var cl_data = [];
+            var cd_data = [];
+        }
         
-        // AI Chat functions - Define these first so they're available for onclick handlers
+        // AI Chat functions - Define first
         function setQuestion(question) {
-            document.getElementById('questionInput').value = question;
+            try {
+                document.getElementById('questionInput').value = question;
+            } catch (e) {
+                console.error('setQuestion error:', e);
+            }
         }
         
         function sendQuestion() {
-            var question = document.getElementById('questionInput').value;
-            if (!question.trim()) {
-                alert('Please enter a question first!');
-                return;
+            try {
+                var question = document.getElementById('questionInput').value;
+                if (!question.trim()) {
+                    alert('Please enter a question first!');
+                    return;
+                }
+                
+                // Show loading
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('response').style.display = 'none';
+                
+                // Send to Flask backend
+                fetch('/ask_ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({question: question})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Show response
+                    document.getElementById('response').style.display = 'block';
+                    document.getElementById('response').textContent = data.response;
+                })
+                .catch(error => {
+                    // Hide loading
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Show error
+                    document.getElementById('response').style.display = 'block';
+                    document.getElementById('response').textContent = 'Error: ' + error;
+                });
+            } catch (e) {
+                console.error('sendQuestion error:', e);
             }
-            
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('response').style.display = 'none';
-            
-            // Send to Flask backend
-            fetch('/ask_ai', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({question: question})
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show response
-                document.getElementById('response').style.display = 'block';
-                document.getElementById('response').textContent = data.response;
-            })
-            .catch(error => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show error
-                document.getElementById('response').style.display = 'block';
-                document.getElementById('response').textContent = 'Error: ' + error;
-            });
         }
         
         function testOllama() {
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('response').style.display = 'none';
-            
-            // Test Ollama connection
-            fetch('/test_ollama')
-            .then(response => response.json())
-            .then(data => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
+            try {
+                // Show loading
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('response').style.display = 'none';
                 
-                // Show response
-                document.getElementById('response').style.display = 'block';
-                if (data.status === 'success') {
-                    document.getElementById('response').textContent = 'AI Connection Test: SUCCESS\n\nResponse: ' + data.response;
-                } else {
-                    document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + JSON.stringify(data, null, 2);
-                }
-            })
-            .catch(error => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show error
-                document.getElementById('response').style.display = 'block';
-                document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + error;
-            });
+                // Test Ollama connection
+                fetch('/test_ollama')
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Show response
+                    document.getElementById('response').style.display = 'block';
+                    if (data.status === 'success') {
+                        document.getElementById('response').textContent = 'AI Connection Test: SUCCESS\n\nResponse: ' + data.response;
+                    } else {
+                        document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + JSON.stringify(data, null, 2);
+                    }
+                })
+                .catch(error => {
+                    // Hide loading
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Show error
+                    document.getElementById('response').style.display = 'block';
+                    document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + error;
+                });
+            } catch (e) {
+                console.error('testOllama error:', e);
+            }
         }
         
-        // Create plots after functions are defined
-        // Lift vs AoA plot
-        var trace1 = {
-            x: aoa_data,
-            y: lift_data,
-            mode: 'lines+markers',
-            name: 'Lift',
-            line: {color: '#007bff'},
-            marker: {color: '#007bff'}
-        };
-        Plotly.newPlot('plot1', [trace1], {
-            title: 'Lift vs Angle of Attack',
-            xaxis: {title: 'Angle of Attack (degrees)'},
-            yaxis: {title: 'Lift (mN)'}
-        });
-        
-        // Drag vs AoA plot
-        var trace2 = {
-            x: aoa_data,
-            y: drag_data,
-            mode: 'lines+markers',
-            name: 'Drag',
-            line: {color: '#dc3545'},
-            marker: {color: '#dc3545'}
-        };
-        Plotly.newPlot('plot2', [trace2], {
-            title: 'Drag vs Angle of Attack',
-            xaxis: {title: 'Angle of Attack (degrees)'},
-            yaxis: {title: 'Drag (mN)'}
-        });
-        
-        // Lift-Drag Polar
-        var trace3 = {
-            x: cd_data,
-            y: cl_data,
-            mode: 'lines+markers',
-            name: 'Polar',
-            line: {color: '#28a745'},
-            marker: {color: '#28a745'}
-        };
-        Plotly.newPlot('plot3', [trace3], {
-            title: 'Lift-Drag Polar Diagram',
-            xaxis: {title: 'Drag Coefficient (Cd)'},
-            yaxis: {title: 'Lift Coefficient (Cl)'}
-        });
-        
-        // Coefficients vs AoA
-        var trace4a = {
-            x: aoa_data,
-            y: cl_data,
-            mode: 'lines+markers',
-            name: 'Cl',
-            line: {color: '#007bff'},
-            marker: {color: '#007bff'}
-        };
-        var trace4b = {
-            x: aoa_data,
-            y: cd_data,
-            mode: 'lines+markers',
-            name: 'Cd',
-            yaxis: 'y2',
-            line: {color: '#ffc107'},
-            marker: {color: '#ffc107'}
-        };
-        Plotly.newPlot('plot4', [trace4a, trace4b], {
-            title: 'Aerodynamic Coefficients vs Angle of Attack',
-            xaxis: {title: 'Angle of Attack (degrees)'},
-            yaxis: {title: 'Lift Coefficient (Cl)'},
-            yaxis2: {
-                title: 'Drag Coefficient (Cd)',
-                overlaying: 'y',
-                side: 'right'
+        // Create plots with error handling
+        try {
+            if (aoa_data && aoa_data.length > 0) {
+                // Lift vs AoA plot
+                var trace1 = {
+                    x: aoa_data,
+                    y: lift_data,
+                    mode: 'lines+markers',
+                    name: 'Lift',
+                    line: {color: '#007bff'},
+                    marker: {color: '#007bff'}
+                };
+                Plotly.newPlot('plot1', [trace1], {
+                    title: 'Lift vs Angle of Attack',
+                    xaxis: {title: 'Angle of Attack (degrees)'},
+                    yaxis: {title: 'Lift (mN)'}
+                });
+                
+                // Drag vs AoA plot
+                var trace2 = {
+                    x: aoa_data,
+                    y: drag_data,
+                    mode: 'lines+markers',
+                    name: 'Drag',
+                    line: {color: '#dc3545'},
+                    marker: {color: '#dc3545'}
+                };
+                Plotly.newPlot('plot2', [trace2], {
+                    title: 'Drag vs Angle of Attack',
+                    xaxis: {title: 'Angle of Attack (degrees)'},
+                    yaxis: {title: 'Drag (mN)'}
+                });
+                
+                // Lift-Drag Polar
+                var trace3 = {
+                    x: cd_data,
+                    y: cl_data,
+                    mode: 'lines+markers',
+                    name: 'Polar',
+                    line: {color: '#28a745'},
+                    marker: {color: '#28a745'}
+                };
+                Plotly.newPlot('plot3', [trace3], {
+                    title: 'Lift-Drag Polar Diagram',
+                    xaxis: {title: 'Drag Coefficient (Cd)'},
+                    yaxis: {title: 'Lift Coefficient (Cl)'}
+                });
+                
+                // Coefficients vs AoA
+                var trace4a = {
+                    x: aoa_data,
+                    y: cl_data,
+                    mode: 'lines+markers',
+                    name: 'Cl',
+                    line: {color: '#007bff'},
+                    marker: {color: '#007bff'}
+                };
+                var trace4b = {
+                    x: aoa_data,
+                    y: cd_data,
+                    mode: 'lines+markers',
+                    name: 'Cd',
+                    yaxis: 'y2',
+                    line: {color: '#ffc107'},
+                    marker: {color: '#ffc107'}
+                };
+                Plotly.newPlot('plot4', [trace4a, trace4b], {
+                    title: 'Aerodynamic Coefficients vs Angle of Attack',
+                    xaxis: {title: 'Angle of Attack (degrees)'},
+                    yaxis: {title: 'Lift Coefficient (Cl)'},
+                    yaxis2: {
+                        title: 'Drag Coefficient (Cd)',
+                        overlaying: 'y',
+                        side: 'right'
+                    }
+                });
+            } else {
+                console.error('No data available for plotting');
             }
-        });
+        } catch (e) {
+            console.error('Plotting error:', e);
+        }
         
-        // Allow Enter key to send question
-        document.getElementById('questionInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendQuestion();
-            }
-        });
+        // Event listeners
+        try {
+            // Allow Enter key to send question
+            document.getElementById('questionInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendQuestion();
+                }
+            });
+        } catch (e) {
+            console.error('Event listener error:', e);
+        }
     </script>
 </body>
 </html>
