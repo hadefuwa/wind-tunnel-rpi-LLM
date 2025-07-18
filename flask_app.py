@@ -27,8 +27,7 @@ Please provide a clear, technical analysis based on this aerodynamic data. Focus
                 "model": "gemma3:1b",  # Using Gemma3 1B model
                 "prompt": full_prompt,
                 "stream": False
-            },
-            timeout=30
+            }
         )
         
         if response.status_code == 200:
@@ -39,7 +38,7 @@ Please provide a clear, technical analysis based on this aerodynamic data. Focus
     except requests.exceptions.ConnectionError:
         return "Error: Could not connect to Ollama. Make sure Ollama is running locally on port 11434."
     except requests.exceptions.Timeout:
-        return "Error: Request timed out. The model might be taking too long to respond."
+        return "Error: Request timed out after 2 minutes. The Raspberry Pi might need more time to process your request. Try a simpler question or wait for the model to fully load."
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -155,10 +154,10 @@ template = '''
 </head>
 <body>
     <div class="container">
-        <h1>🌪️ Wind Tunnel Data Explorer with AI Analysis</h1>
+        <h1>Wind Tunnel Data Explorer with AI Analysis</h1>
         <p>Analyze wind tunnel test data with interactive visualizations and AI insights using Gemma3 1B</p>
         
-        <h2>📊 Dataset Overview</h2>
+        <h2>Dataset Overview</h2>
         <div class="metrics">
             <div class="metric">
                 <h3>{{ data_points }}</h3>
@@ -174,38 +173,38 @@ template = '''
             </div>
         </div>
         
-        <h2>📋 Raw Data</h2>
+        <h2>Raw Data</h2>
         {{ data_table|safe }}
         
-        <h2>📈 Interactive Visualizations</h2>
+        <h2>Interactive Visualizations</h2>
         <div id="plot1" class="plot"></div>
         <div id="plot2" class="plot"></div>
         <div id="plot3" class="plot"></div>
         <div id="plot4" class="plot"></div>
         
         <div class="ai-section">
-            <h2>🤖 AI Analysis with Gemma3</h2>
+            <h2>AI Analysis with Gemma3</h2>
             <p>Ask questions about the wind tunnel data and get AI-powered insights!</p>
             
             <div>
                 <strong>Example Questions:</strong><br>
-                <button class="example-btn" onclick="setQuestion('What is the optimal angle of attack for maximum lift?')">📝 Optimal AoA for max lift?</button>
-                <button class="example-btn" onclick="setQuestion('At what angle does stall occur?')">📝 Stall angle?</button>
-                <button class="example-btn" onclick="setQuestion('What is the lift-to-drag ratio at different angles?')">📝 L/D ratio analysis</button>
-                <button class="example-btn" onclick="setQuestion('Explain the aerodynamic behavior shown in this data')">📝 Aerodynamic behavior</button>
-                <button class="example-btn" onclick="setQuestion('What angle of attack gives the best efficiency?')">📝 Best efficiency angle</button>
+                <button class="example-btn" onclick="setQuestion('What is the optimal angle of attack for maximum lift?')">Optimal AoA for max lift?</button>
+                <button class="example-btn" onclick="setQuestion('At what angle does stall occur?')">Stall angle?</button>
+                <button class="example-btn" onclick="setQuestion('What is the lift-to-drag ratio at different angles?')">L/D ratio analysis</button>
+                <button class="example-btn" onclick="setQuestion('Explain the aerodynamic behavior shown in this data')">Aerodynamic behavior</button>
+                <button class="example-btn" onclick="setQuestion('What angle of attack gives the best efficiency?')">Best efficiency angle</button>
             </div>
             
             <input type="text" id="questionInput" class="chat-input" placeholder="e.g., What is the relationship between angle of attack and lift coefficient?" />
             <br>
-            <button class="btn" onclick="sendQuestion()">🚀 Send test data to AI</button>
+            <button class="btn" onclick="sendQuestion()">Send test data to AI</button>
             
-            <div class="loading" id="loading">🧠 AI is analyzing your data...</div>
+            <div class="loading" id="loading">AI is analyzing your data...</div>
             <div id="response" class="response" style="display: none;"></div>
         </div>
         
         <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
-            <h3>ℹ️ Technical Information</h3>
+            <h3>Technical Information</h3>
             <p><strong>Data Structure:</strong></p>
             <ul>
                 <li>AoA (deg): Angle of Attack in degrees</li>
