@@ -1,53 +1,113 @@
 # Wind Tunnel Data Explorer with AI Analysis
 
-A Streamlit application for analyzing wind tunnel test data with interactive visualizations and AI-powered insights using Gemma3 1B via Ollama.
+A web application for analyzing wind tunnel test data with AI-powered insights using Gemma3 1B model via Ollama. Available in both Streamlit and Flask versions for maximum compatibility.
 
 ## Features
 
-- 📊 **Interactive Data Visualization**: Multiple chart types using Plotly
-- 🤖 **AI Analysis**: Query your data using natural language with Gemma3 1B
-- 📈 **Aerodynamic Analysis**: Specialized visualizations for lift, drag, and coefficients
-- 💬 **Chat Interface**: Ask questions and get technical insights about your data
-- 🚀 **Real-time Processing**: Fast analysis powered by local AI model
+- 📊 Interactive data visualizations with Plotly
+- 🤖 AI analysis using Gemma3 1B model
+- 📈 Multiple chart types (lift/drag curves, polar diagrams, coefficients)
+- 💬 Chat interface for data exploration
+- � Responsive web interface
+- 🎯 Flask version optimized for Raspberry Pi compatibility
 
-## Installation
+## Requirements
 
-### Prerequisites
+- Python 3.8+
+- Ollama with Gemma3 1B model installed
+- Internet connection for initial setup
 
-1. **Python 3.8+**
-2. **Ollama** installed and running locally
-3. **Gemma3 1B model** pulled in Ollama
+## Setup Instructions
 
-### Setup Instructions
+### 1. Install Python Dependencies
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/hadefuwa/wind-tunnel-rpi-LLM.git
-   cd wind-tunnel-rpi-LLM
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-2. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Install and Setup Ollama
 
-3. **Install and setup Ollama:**
-   ```bash
-   # Install Ollama (Linux/macOS)
-   curl -fsSL https://ollama.ai/install.sh | sh
-   
-   # For Windows, download from https://ollama.ai/download
-   ```
+#### On Raspberry Pi:
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+ollama pull gemma3:1b
+```
 
-4. **Pull the Gemma3 model:**
-   ```bash
-   ollama pull gemma2:2b
-   ```
+#### On Windows/Mac/Linux:
+1. Download Ollama from https://ollama.ai
+2. Install and run: `ollama pull gemma3:1b`
 
-5. **Start Ollama service:**
-   ```bash
-   ollama serve
-   ```
+### 3. Run the Application
+
+#### Option A: Streamlit Version (Windows/Mac/Linux)
+```bash
+streamlit run app.py
+```
+
+#### Option B: Flask Version (All platforms, especially Raspberry Pi)
+```bash
+python flask_app.py
+```
+
+Both apps will be available at: http://localhost:8501
+
+## Usage
+
+1. **Data Visualization**: Explore interactive charts showing aerodynamic relationships
+2. **AI Analysis**: Use the AI chat section to ask questions about the data
+3. **Sample Questions**:
+   - "What is the optimal angle of attack for maximum lift?"
+   - "At what angle does stall occur?"
+   - "What is the lift-to-drag ratio at different angles?"
+   - "Explain the aerodynamic behavior shown in this data"
+
+## Data Format
+
+The CSV file should contain columns:
+- `AoA (deg)`: Angle of Attack in degrees
+- `Lift (mN)`: Lift force in millinewtons
+- `Cl`: Lift coefficient
+- `Drag (mN)`: Drag force in millinewtons  
+- `Cd`: Drag coefficient
+
+## Raspberry Pi Deployment
+
+### SSH Setup
+```bash
+# Copy files to Pi
+scp -r . pi@your-pi-ip:/home/pi/wind-tunnel-app/
+
+# SSH into Pi
+ssh pi@your-pi-ip
+
+# Navigate and setup
+cd /home/pi/wind-tunnel-app/
+python3 -m venv venv
+source venv/bin/activate
+pip install flask pandas requests
+
+# Run Flask app (recommended for Pi)
+python3 flask_app.py
+```
+
+## Troubleshooting
+
+- **Streamlit "Illegal instruction" on Pi**: Use Flask version instead
+- Ensure Ollama is running: `ollama list`
+- Check model availability: `ollama list | grep gemma3`
+- Verify port 11434 is not blocked
+
+## Technical Stack
+
+- **Frontend**: Streamlit or Flask + HTML/CSS/JavaScript
+- **Charts**: Plotly (Streamlit) or Plotly.js (Flask)
+- **AI Model**: Gemma3 1B (via Ollama)
+- **Data Processing**: Pandas
+
+## App Versions
+
+- **app.py**: Full-featured Streamlit version with advanced UI components
+- **flask_app.py**: Lightweight Flask version optimized for Raspberry Pi compatibility
 
 ## Usage
 
