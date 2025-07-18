@@ -233,13 +233,87 @@ template = '''
     </div>
     
     <script>
-        // Plot data
-        var aoa_data = {{ aoa_data|safe }};
-        var lift_data = {{ lift_data|safe }};
-        var drag_data = {{ drag_data|safe }};
-        var cl_data = {{ cl_data|safe }};
-        var cd_data = {{ cd_data|safe }};
+        // Plot data - using JSON encoding to prevent syntax errors
+        var aoa_data = JSON.parse('{{ aoa_data|tojson }}');
+        var lift_data = JSON.parse('{{ lift_data|tojson }}');
+        var drag_data = JSON.parse('{{ drag_data|tojson }}');
+        var cl_data = JSON.parse('{{ cl_data|tojson }}');
+        var cd_data = JSON.parse('{{ cd_data|tojson }}');
         
+        // AI Chat functions - Define these first so they're available for onclick handlers
+        function setQuestion(question) {
+            document.getElementById('questionInput').value = question;
+        }
+        
+        function sendQuestion() {
+            var question = document.getElementById('questionInput').value;
+            if (!question.trim()) {
+                alert('Please enter a question first!');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('response').style.display = 'none';
+            
+            // Send to Flask backend
+            fetch('/ask_ai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({question: question})
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show response
+                document.getElementById('response').style.display = 'block';
+                document.getElementById('response').textContent = data.response;
+            })
+            .catch(error => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show error
+                document.getElementById('response').style.display = 'block';
+                document.getElementById('response').textContent = 'Error: ' + error;
+            });
+        }
+        
+        function testOllama() {
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('response').style.display = 'none';
+            
+            // Test Ollama connection
+            fetch('/test_ollama')
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show response
+                document.getElementById('response').style.display = 'block';
+                if (data.status === 'success') {
+                    document.getElementById('response').textContent = 'AI Connection Test: SUCCESS\n\nResponse: ' + data.response;
+                } else {
+                    document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + JSON.stringify(data, null, 2);
+                }
+            })
+            .catch(error => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show error
+                document.getElementById('response').style.display = 'block';
+                document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + error;
+            });
+        }
+        
+        // Create plots after functions are defined
         // Lift vs AoA plot
         var trace1 = {
             x: aoa_data,
@@ -313,79 +387,6 @@ template = '''
                 side: 'right'
             }
         });
-        
-        // AI Chat functions
-        function setQuestion(question) {
-            document.getElementById('questionInput').value = question;
-        }
-        
-        function sendQuestion() {
-            var question = document.getElementById('questionInput').value;
-            if (!question.trim()) {
-                alert('Please enter a question first!');
-                return;
-            }
-            
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('response').style.display = 'none';
-            
-            // Send to Flask backend
-            fetch('/ask_ai', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({question: question})
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show response
-                document.getElementById('response').style.display = 'block';
-                document.getElementById('response').textContent = data.response;
-            })
-            .catch(error => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show error
-                document.getElementById('response').style.display = 'block';
-                document.getElementById('response').textContent = 'Error: ' + error;
-            });
-        }
-        
-        function testOllama() {
-            // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('response').style.display = 'none';
-            
-            // Test Ollama connection
-            fetch('/test_ollama')
-            .then(response => response.json())
-            .then(data => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show response
-                document.getElementById('response').style.display = 'block';
-                if (data.status === 'success') {
-                    document.getElementById('response').textContent = 'AI Connection Test: SUCCESS\n\nResponse: ' + data.response;
-                } else {
-                    document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + JSON.stringify(data, null, 2);
-                }
-            })
-            .catch(error => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
-                
-                // Show error
-                document.getElementById('response').style.display = 'block';
-                document.getElementById('response').textContent = 'AI Connection Test: FAILED\n\nError: ' + error;
-            });
-        }
         
         // Allow Enter key to send question
         document.getElementById('questionInput').addEventListener('keypress', function(e) {
