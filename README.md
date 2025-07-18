@@ -1,18 +1,18 @@
-# 🌪️ Wind Tunnel Data Explorer with AI Analysis
+# Wind Tunnel Data Explorer with AI Analysis
 
 A powerful Flask web application for analyzing wind tunnel aerodynamic test data with AI-powered insights. Features interactive visualizations and intelligent chat interface powered by the Gemma3 1B language model running locally via Ollama.
 
-## 🚀 What This App Does
+## What This App Does
 
 This Flask application provides a comprehensive platform for aerodynamic data analysis with:
 
-- **📊 Interactive Data Visualization**: Four different chart types showing aerodynamic relationships
-- **🤖 AI-Powered Analysis**: Ask natural language questions about your wind tunnel data
-- **💡 Expert Insights**: Get technical explanations of aerodynamic phenomena
-- **🔬 Educational Tool**: Perfect for students and engineers learning aerodynamics
-- **🏠 Privacy-First**: All AI processing happens locally on your device
+- **Interactive Data Visualization**: Four different chart types showing aerodynamic relationships
+- **AI-Powered Analysis**: Ask natural language questions about your wind tunnel data
+- **Expert Insights**: Get technical explanations of aerodynamic phenomena
+- **Educational Tool**: Perfect for students and engineers learning aerodynamics
+- **Privacy-First**: All AI processing happens locally on your device
 
-## 🎯 Key Features
+## Key Features
 
 ### Data Visualization
 - **Lift vs Angle of Attack**: See how lift force changes with wing angle
@@ -36,7 +36,7 @@ This Flask application provides a comprehensive platform for aerodynamic data an
 - **Data Format**: Standard aerodynamic CSV format
 - **Deployment**: Raspberry Pi ready with ARM compatibility
 
-## 🛠️ Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -77,7 +77,7 @@ python3 flask_app.py
 
 5. **Open in browser**: http://localhost:5000
 
-## 🚀 Easy Startup Scripts
+## Easy Startup Scripts
 
 ### Windows
 ```bash
@@ -92,7 +92,7 @@ chmod +x run.sh
 ./run.sh
 ```
 
-## 📁 Data Format
+## Data Format
 
 Your CSV file should be named `wind_tunnel_test_data.csv` with these columns:
 
@@ -114,7 +114,7 @@ AoA (deg),Lift (mN),Cl,Drag (mN),Cd
 10,720.1,0.601,89.5,0.075
 ```
 
-## 🥧 Raspberry Pi Deployment
+## Raspberry Pi Deployment
 
 ### SSH Installation
 ```bash
@@ -135,7 +135,7 @@ cd wind-tunnel-app
 - **Memory Usage**: ~2GB for model + 500MB for Flask
 - **Cooling**: Ensure adequate ventilation for sustained use
 
-## 🧠 How the AI Works
+## How the AI Works
 
 The Flask application uses a sophisticated prompt engineering approach:
 
@@ -149,7 +149,7 @@ The Flask application uses a sophisticated prompt engineering approach:
 **User**: "What angle gives maximum lift?"  
 **AI**: "Maximum lift occurs at 15° angle of attack with 850.7 mN force (Cl = 0.709). Beyond this point, flow separation begins causing stall characteristics."
 
-## 🔧 Flask Architecture
+## Flask Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -170,7 +170,7 @@ The Flask application uses a sophisticated prompt engineering approach:
 - **`/chat`**: POST endpoint for AI queries
 - **`/test_ai`**: AI connection testing endpoint
 
-## 🎓 Educational Use Cases
+## Educational Use Cases
 
 ### For Students
 - **Learn Aerodynamics**: Visualize how wing angle affects lift and drag
@@ -184,7 +184,7 @@ The Flask application uses a sophisticated prompt engineering approach:
 - **Documentation**: Generate insights for reports
 - **Teaching**: Demonstrate concepts with real data
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -213,7 +213,7 @@ The Flask application uses a sophisticated prompt engineering approach:
 - Monitor with `htop`
 - Consider adding swap space
 
-## 📈 Performance Optimization
+## Performance Optimization
 
 ### For Raspberry Pi
 ```bash
@@ -232,7 +232,7 @@ watch -n 1 'free -h'
 - **Use Chrome/Firefox** for best JavaScript performance
 - **Wait for responses** - AI processing takes time
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature-name`
@@ -241,11 +241,11 @@ watch -n 1 'free -h'
 5. Push to branch: `git push origin feature-name`
 6. Submit pull request
 
-## 📝 License
+## License
 
 MIT License - feel free to use for educational and commercial purposes.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Ollama Team**: For local AI model deployment
 - **Google**: For the Gemma3 language model
@@ -254,6 +254,6 @@ MIT License - feel free to use for educational and commercial purposes.
 
 ---
 
-**Built with ❤️ for aerodynamics education and research**
+**Built with care for aerodynamics education and research**
 
 *Transform your wind tunnel data into insights with the power of local AI and Flask*
