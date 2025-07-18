@@ -16,19 +16,19 @@ else
 fi
 
 # Check if Gemma model is available
-echo "Checking for Gemma2 model..."
-if ! ollama list | grep -q "gemma2:2b"; then
-    echo "📥 Downloading Gemma2 2B model..."
-    ollama pull gemma2:2b
+echo "Checking for Gemma3 model..."
+if ! ollama list | grep -q "gemma3:1b"; then
+    echo "📥 Downloading Gemma3 1B model..."
+    ollama pull gemma3:1b
     echo "✅ Model downloaded"
 else
-    echo "✅ Gemma2 2B model is available"
+    echo "✅ Gemma3 1B model is available"
 fi
 
 # Install Python dependencies if needed
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Start Streamlit app
-echo "🚀 Starting Streamlit app..."
-streamlit run app.py
+# Start Flask app
+echo "🚀 Starting Flask app..."
+python3 flask_app.py

@@ -1,4 +1,4 @@
-Software Plan: Wind Tunnel CSV + LLM Explorer (Prototype 1)
+Software Plan: Wind Tunnel CSV + LLM Explorer (Flask Implementation)
 Objective
 Create a simple Raspberry Pi app that:
 
@@ -41,9 +41,11 @@ App sends CSV + question to Ollama via API
 App displays AI’s response below
 
 Tech Stack
-UI: Python + Streamlit (runs locally)
+Backend: Python + Flask (lightweight web server)
 
-Plotting: matplotlib or Plotly
+Frontend: HTML/CSS/JavaScript with embedded templates
+
+Plotting: Plotly.js (client-side interactive charts)
 
 Data: pandas
 
@@ -52,7 +54,7 @@ LLM API: requests library to connect to local Ollama (Gemma3 1B model)
 CSV file: Assumed present at fixed path
 
 Deliverables
-Streamlit app code
+Flask app code (flask_app.py)
 
 Uses predefined CSV file (no uploads)
 
